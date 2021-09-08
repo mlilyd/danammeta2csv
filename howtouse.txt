@@ -1,0 +1,4 @@
+python create_report.py -csv danam_metadata_2021-04-14_18-18.csv
+
+python create_report.py -txt ids.txt
+

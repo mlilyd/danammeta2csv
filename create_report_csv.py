@@ -37,7 +37,7 @@ def get_role(key):
     for role_key in roles.keys():
         if role_key in key:
             return roles[role_key]
-    return "Editor?"
+    return "Editor"
 
 '''
 reformat editorial text for CSV output
