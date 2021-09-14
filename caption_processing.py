@@ -71,7 +71,7 @@ heidicon_id = {
             ' Pankaj Nakarmi': '1300339',
 }
 '''
-heidicon_id = json.load(open("heidicon_id.json"))[0]
+heidicon_id = json.load(open("json/heidicon_id.json"))[0]
 
 
 gnd_dict = {

@@ -12,10 +12,10 @@ from create_report import get_url_from_txt
 exports image array as a json file that can easily be re-imported into python and used again for other scripts. JSON is named
     'danam_metadata_<export date>_<export time>.json'
 '''
-def write_json(array, dir=".\\"):
-    #now = datetime.now().strftime("%Y-%m-%d_%H-%M")
+def write_json(array, dir="json/"):
+    now = datetime.now().strftime("%Y-%m-%d_%H-%M")
     #filename = "danam_metadata_{}.json".format(now)
-    filename = "cleaned_metadata.json"
+    filename = "cleaned_metadata_{}.json".format(now)
     with open(dir+filename, 'w') as file:
         json.dump(array, file)
 
@@ -27,7 +27,7 @@ exports pre-processed image metadata array into csv file for importing DANAM met
     'danam_metadata_<export date>_<export time>.csv'
 if optional parameter dir is not given, the csv will be written in the same folder as the python script
 '''
-def write_csv(metadata, dir=".\\"):
+def write_csv(metadata, dir="csv/"):
     csv_file_content = ""
     headers = "Filename; Title/caption;	Date inscription/object;	Date photo/drawing text;	Date photo/drawing Y-M-D;	Date photo/drawing to;	Agent 1;	Role of Agent 1;	Agent 2;	Role of Agent 2;	Owner;	References;   ;  Notes;   monument-id;	classification-id;	classification-text;	Agent 3;	Date scan/digitization;	image-licence;	image-right-url;	image-rights-text;	heiDATA-link;	heiDOK-link; editorial; report_url\n"
 
@@ -50,11 +50,6 @@ def write_csv(metadata, dir=".\\"):
 
     now = datetime.now().strftime("%Y-%m-%d_%H-%M")
     filename = "danam_metadata_{}.csv".format(now)
-    file = codecs.open(dir+filename, 'w', 'utf-8')
-    file.write(csv_file_content)
-    file.close()
-
-    filename = "danam_metadata_latest.csv"
     file = codecs.open(dir+filename, 'w', 'utf-8')
     file.write(csv_file_content)
     file.close()
@@ -232,21 +227,22 @@ input:
 output:
 
 '''
-def danam_to_csv(danam_export, dir=".\\", verbose=False, json=False, report=False, ids=[]):
+def danam_to_csv(danam_export, dir="csv/", verbose=False, json=False, report=False, ids=[], fix=True):
     images = read_danam_export(danam_export)
     metadata = []
     metadata_report = []
     
     log = "log.txt"
-    logfile = codecs.open(dir+log, 'a', 'utf-8')
+    logfile = codecs.open(log, 'a', 'utf-8')
 
     prev_mon_id = "ABCDE"
 
     for image in images:
 
         caption = get_caption(image)
-        
-        caption = caption.replace(", photo by", "; photo by")
+    
+        if fix:
+            caption = caption.replace(", photo by", "; photo by")
     
         
         parts = caption.split(';')
@@ -292,11 +288,12 @@ if __name__ == "__main__":
     '''
     argparser = argparse.ArgumentParser(description="convert DANAM JSON export into HeidIcon CSV")
 
-    argparser.add_argument("-f", "--file", required=True, help="DANAM json export")
-    argparser.add_argument("-v", "--verbose", dest='verbose', required=False, action="store_true")
-    argparser.add_argument("-json", "--json", dest='json', required=False, action="store_true")
+    argparser.add_argument("-f", "--file", required=True, help="DANAM json dump")
+    argparser.add_argument("-v", "--verbose", dest='verbose', required=False, action="store_true", help="output logs in command line")
+    argparser.add_argument("-json", "--json", dest='json', required=False, action="store_true", help="output cleaned metadata json")
     argparser.add_argument("-ids", required=False, type=str, help="export CSV only for monuments in a given txt file")
     argparser.add_argument("-report", "--report-meta", dest='reportmeta', required=False, action="store_true", help="export report metadata as well as image metadata")
+    argparser.add_argument("-no-fix", required=False, dest='nofix', action="store_false", help="set to not fix possible mistakes in the caption")
     args = argparser.parse_args()
     
     ids = []
@@ -308,4 +305,4 @@ if __name__ == "__main__":
     else:
         print("Exporting CSV Metadata for all monuments in JSON")
         
-    danam_to_csv(args.file, verbose=args.verbose, json=args.json, report=args.reportmeta, ids=ids)
+    danam_to_csv(args.file, verbose=args.verbose, json=args.json, report=args.reportmeta, ids=ids, fix=args.nofix)

@@ -91,8 +91,3 @@ def write_csv_report_metadata(metadata, dir=".\\"):
     file = codecs.open(dir+filename, 'w', 'utf-8')
     file.write(csv_file_content)
     file.close()
-
-    filename = "danam_report_metadata_latest.csv"
-    file = codecs.open(dir+filename, 'w', 'utf-8')
-    file.write(csv_file_content)
-    file.close()

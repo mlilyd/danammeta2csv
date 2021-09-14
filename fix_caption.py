@@ -1,5 +1,5 @@
 #from danam_to_csv import *
-from danam_to_csv_ver2 import *
+from main import *
 #logfile = codecs.open("fix_log.txt", 'a', 'utf-8')
 
 
