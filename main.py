@@ -27,29 +27,43 @@ exports pre-processed image metadata array into csv file for importing DANAM met
     'danam_metadata_<export date>_<export time>.csv'
 if optional parameter dir is not given, the csv will be written in the same folder as the python script
 '''
-def write_csv(metadata, dir="csv/"):
+def write_csv(metadata, logfile, dir="csv/", ids=[]):
+    
+    using_mon_ids = (len(ids)>0)
+   
     csv_file_content = ""
-    headers = "Filename; Title/caption;	Date inscription/object;	Date photo/drawing text;	Date photo/drawing Y-M-D;	Date photo/drawing to;	Agent 1;	Role of Agent 1;	Agent 2;	Role of Agent 2;	Owner;	References;   ;  Notes;   monument-id;	classification-id;	classification-text;	Agent 3;	Date scan/digitization;	image-licence;	image-right-url;	image-rights-text;	heiDATA-link;	heiDOK-link; editorial; report_url\n"
-
+    headers = "Filename; Title/caption;	Date inscription/object;	Date photo/drawing text;	Date photo/drawing Y-M-D;	Date photo/drawing to;	Agent 1;	Role of Agent 1;	Agent 2;	Role of Agent 2;	Owner;	References;   ;  Notes;   monument-id;	classification-id;	classification-text;	Agent 3;	Date scan/digitization;	image-licence;	image-right-url;	image-rights-text;	heiDATA-link;	heiDOK-link;\n"
+   
+   
     csv_file_content += headers
     for item in metadata:
         try:
+            
+            # if we are getting only a few monuments based on mon_ids.txt, and item's mon_id is not in mon_ids, skip
+            if using_mon_ids and item['mon_id'] not in ids:
+                logfile.write("Skipping this item because {} is not in mon_ids.txt.\n".format(item['mon_id']))
+                continue
+            
             csv_file_content += '\"'+item['filename']+'\"'+";" + '\"'+item['caption']+'\"'+";" + '\"'+item['date1']+'\"'+";" + '\"'+item['date2']+'\"'+";"
             csv_file_content += '\"'+item['date']+'\"'+";" + '\"'+item['date3']+'\"'+";" + '\"'+item['agent']+'\"'+";" + '\"'+item['role']+'\"'+";"
             csv_file_content += '\"'+item['agent2']+'\"'+";" + '\"'+item['role2']+'\"'+";" + '\"'+one_line(item['copyright'])+'\"'+";" + '\"'+one_line(item['source'])+'\"'+";"
             csv_file_content += '\"\"'+";" +'\"'+one_line(item['notes'])+'\"'+";" + '\"'+item['mon_id']+'\"'+";" + '\"'+item['class_code']+'\"'+";" + '\"'+item['classification']+'\"'+";"
             csv_file_content += '\"'+item['agent3']+'\"'+";" + '\"'+item['date_scan']+'\"'+";" + '\"'+item['license']+'\"'+";" + '\"'+item['url']+'\"'+";" + '\"'+item['rights_text']+'\"'+";"
-            csv_file_content += '\"'+item['heidata']+'\"'+";" + '\"'+item['heidoc']+'\"'+";"  + '\"'+item['report_url']+'\"'+";"
-
-            csv_file_content += "\n"
-
-        except:
-            csv_file_content += '\n'
-            print("Key Error! This image entry only has the following keys:\n{}".format('\n'.join(item.keys())))
+            csv_file_content += '\"'+item['heidata']+'\"'+";" + '\"'+item['heidoc']+'\"'
+            
+        except Exception as e:
+            logfile.write("Key Error! Image entry \'{}\' only has the following keys:\n{}".format( item['filename'],'\n'.join(item.keys())))
             pass
 
+        csv_file_content += "\n"
+
+
     now = datetime.now().strftime("%Y-%m-%d_%H-%M")
-    filename = "danam_metadata_{}.csv".format(now)
+    if using_mon_ids:
+        filename = "danam_metadata_select_{}.csv".format(now)
+    else:
+        filename = "danam_metadata_all_{}.csv".format(now)
+        
     file = codecs.open(dir+filename, 'w', 'utf-8')
     file.write(csv_file_content)
     file.close()
@@ -231,9 +245,9 @@ def danam_to_csv(danam_export, dir="csv/", verbose=False, json=False, report=Fal
     images = read_danam_export(danam_export)
     metadata = []
     metadata_report = []
-    
+        
     log = "log.txt"
-    logfile = codecs.open(log, 'a', 'utf-8')
+    logfile = codecs.open(log, 'w', 'utf-8')
 
     prev_mon_id = "ABCDE"
 
@@ -248,9 +262,9 @@ def danam_to_csv(danam_export, dir="csv/", verbose=False, json=False, report=Fal
         parts = caption.split(';')
 
         if not valid_caption(caption) or len(parts) < 3:
-            logfile.write("Caption\n\"{}\"\nis not valid!".format(caption))
+            logfile.write("{}\"\n is not a valid caption!\n".format(caption))
             if verbose:
-                print("Caption\n\"{}\"\nis not valid!".format(caption))
+                print("\"{}\"\n is not a valid caption!\n".format(caption))
             
             image_metadata = {}
             metadata_from_json(image, image_metadata)
@@ -263,18 +277,25 @@ def danam_to_csv(danam_export, dir="csv/", verbose=False, json=False, report=Fal
       
             image_metadata = get_metadata(image, parts)
             mon_id = image_metadata['mon_id']
-            if (len(ids) > 0 and mon_id in ids) or (len(ids)<=0):        
-                metadata.append(image_metadata)
-                if prev_mon_id != mon_id:
-                    prev_mon_id = mon_id
-                    metadata_report.append(image_metadata)
+            metadata.append(image_metadata)
+            if prev_mon_id != mon_id:
+                prev_mon_id = mon_id
+                metadata_report.append(image_metadata)
 
     if json:
-        write_json(metadata, dir)
+        write_json(metadata)
+
+    if len(ids) > 0:
+        write_csv(metadata, logfile, dir, ids)
+    else:
+        write_csv(metadata, logfile, dir)
         
-    write_csv(metadata, dir)
+        
     if report:
-        write_csv_report_metadata(metadata_report, dir)
+        if len(ids) > 0:
+            write_csv_report_metadata(metadata_report, dir)
+        else:
+            write_csv_report_metadata(metadata_report, dir)
     
     logfile.write("Images from DANAM: {}\nImages exported to CSV: {}\n".format(len(images), len(metadata)))
     print("Images from DANAM: {}\nImages exported to CSV: {}\n".format(len(images), len(metadata)))
@@ -301,7 +322,8 @@ if __name__ == "__main__":
         print("Reading Monument IDs from "+args.ids)
         ids = get_url_from_txt(args.ids)
         print("Exporting CSV Metadata for the following monuments:\n")
-        print("\n".join(ids))
+        print(ids)
+        
     else:
         print("Exporting CSV Metadata for all monuments in JSON")
         

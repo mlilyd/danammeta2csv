@@ -67,7 +67,7 @@ def get_url_from_txt(textfile):
         for line in file:
             if line[0] == "#":
                 continue
-            id = line.split(" ")[0]
+            id = line.split(" ")[0].strip()
             ids.append(id)
 
     return set(ids)
