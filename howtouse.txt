@@ -1,3 +1,15 @@
+# New: 
+
+Clean DANAM JSON:
+python clean_json.py -f json\DANAM\<JSON dump>
+
+Create CSV file:
+python write_csv.py -f cleaned_metadata_<TIME>.json -report -ids id_monument.txt
+
+
+
+# Old:
+
 creating CSV metadata: python main.py 
 usage: main.py [-h] -f FILE [-v] [-json] [-ids IDS] [-report] [-no-fix]
 
@@ -15,5 +27,5 @@ optional arguments:
 
 
 python create_report.py -csv danam_metadata_2021-04-14_18-18.csv
-python create_report.py -txt ids.txt
+python create_report.py -txt id_report.txt
 
