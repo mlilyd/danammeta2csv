@@ -3,7 +3,7 @@ import argparse
 import html, json
 import re, os, ast
 from datetime import datetime
-from pprint import pprint
+
 
 from caption_processing import metadata_from_caption, valid_caption
 from create_report_csv import write_csv_report_metadata
