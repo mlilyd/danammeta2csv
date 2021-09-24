@@ -6,8 +6,6 @@ from datetime import datetime
 
 
 from caption_processing import metadata_from_caption, valid_caption
-from create_report_csv import write_csv_report_metadata
-from create_report import get_url_from_txt
 '''
 exports image array as a json file that can easily be re-imported into python and used again for other scripts. JSON is named
     'danam_metadata_<export date>_<export time>.json'
@@ -184,7 +182,21 @@ def get_metadata(image, caption_parts):
     return image_metadata
 
 
-
+'''
+replace text using rules in a dictionary
+input:
+    text - text where substrings need to be replacedd
+    dict - dictionary
+output:
+    none
+'''
+def replace_w_json(text, dict):
+    for key in dict.keys():
+        text = text.replace(key, dict[key])
+    
+    return text
+        
+        
 '''
 creates a HeidIcon compatible CSV file out of DANAM json export file
 input:
@@ -208,8 +220,8 @@ def clean_json(danam_export, verbose=False, fix=True):
         caption = get_caption(image)
     
         if fix:
-            caption = caption.replace(", photo by", "; photo by")
-    
+            fixes = json.load(open('json/dict/fixes.json'))[0]
+            caption = replace_w_json(caption, fixes)    
         
         parts = caption.split(';')
 

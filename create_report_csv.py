@@ -1,8 +1,11 @@
+import json
 import codecs
 from datetime import datetime
 
+from clean_json import replace_w_json
 
 # A collection of function to create CSV metadata for DANAM Reports
+heidicon_id = json.load(open("json/dict/heidicon_id.json"))[0]
 
 '''
 create a dictionary based on the editorial text in a DANAM report.
@@ -10,6 +13,7 @@ input: editorial text as string (e.g. '')
 output: 
 '''
 def get_editors(text):
+    text = replace_w_json(text, heidicon_id)
     split = [i.replace("<p>", "").replace("</p>", "").replace("&nbsp;", " ")  for i in text.split("</p><p>")]
     editors = {}
     for item in split:
@@ -77,7 +81,7 @@ def write_csv_report_metadata(metadata, dir=".\\"):
             
         except:
             #csv_file_content += '\n'
-            print("Key Error! This image entry only has the following keys:\n{}".format('\n'.join(item.keys())))
+            #print("Key Error! This image entry only has the following keys:\n{}".format('\n'.join(item.keys())))
             pass
     
     for i in range(0, t_o+1):

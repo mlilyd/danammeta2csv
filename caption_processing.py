@@ -5,7 +5,7 @@ import json
 import re
 
 ########### dictionary definitions ###########
-heidicon_id = json.load(open("json/heidicon_id.json"))[0]
+heidicon_id = json.load(open("json/dict/heidicon_id.json"))[0]
 
 gnd_dict = {
             'architekturzeichnung': '4068827-6',

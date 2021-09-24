@@ -1,13 +1,38 @@
 import json
 import codecs
 import argparse
-from datetime import datetime
 
-from create_report import get_url_from_txt
+from datetime import datetime
 from create_report_csv import write_csv_report_metadata
+
+
 
 def one_line(text):
     return text.replace("\n", "").strip()
+
+'''
+read monument URL id from a simple txt file (one id per line). 
+IDs can be commented as follows:
+
+017a4a8f-b183-4e57-9ff9-54ae1145378f #LAL1870
+60a8a8e0-e4e8-11e9-b125-0242ac130002 #LAL4250
+cfc0099e-f15d-4c3e-8d8f-e048222f7956 #KIR0020
+
+IDs can be commented python-wise with #
+
+'''
+def list_from_txt(textfile):
+    ids = []
+
+    with open(textfile, 'r', encoding="utf-8") as file:
+        for line in file:
+            if line[0] == "#":
+                continue
+            id = line.split(" ")[0].strip()
+            ids.append(id)
+
+    return set(ids)
+
 
 '''
 exports pre-processed image metadata array into csv file for importing DANAM metadata into HeidIcon. csv file is named
@@ -71,11 +96,11 @@ def danam_to_csv(filename, dir="csv/", report=False, ids=[]):
     metadata = json.load(open("json/"+filename))
     metadata_report = json.load(open("json/report_"+filename))
 
-
-    if len(ids) > 0:
-        write_csv(metadata, logfile, dir, ids)
-    else:
-        write_csv(metadata, logfile, dir)
+    if not report:
+        if len(ids) > 0:
+            write_csv(metadata, logfile, dir, ids)
+        else:
+            write_csv(metadata, logfile, dir)
         
         
     if report:
@@ -105,7 +130,7 @@ if __name__ == "__main__":
     ids = []
     if args.ids != None:
         print("Reading Monument IDs from "+args.ids)
-        ids = get_url_from_txt(args.ids)
+        ids = list_from_txt(args.ids)
         print("Exporting CSV Metadata for the following monuments:\n")
         print(ids)
         

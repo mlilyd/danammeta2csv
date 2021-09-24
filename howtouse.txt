@@ -6,6 +6,8 @@ python clean_json.py -f json\DANAM\<JSON dump>
 Create CSV file:
 python write_csv.py -f cleaned_metadata_<TIME>.json -report -ids id_monument.txt
 
+Create CSV for report:
+
 
 
 # Old:

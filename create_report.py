@@ -60,7 +60,7 @@ cfc0099e-f15d-4c3e-8d8f-e048222f7956 #KIR0020
 IDs can be commented python-wise with #
 
 '''
-def get_url_from_txt(textfile):
+def list_from_txt(textfile):
     ids = []
 
     with open(textfile, 'r', encoding="utf-8") as file:
@@ -112,11 +112,8 @@ def get_reports(ids, driver):
             driver.get(url+id)
             print(driver.title + " loaded.")
             time.sleep(10)
-            driver.execute_script('window.print();')
-            print(driver.title + " downloaded.")
-            filename = driver.title + ".pdf"
-
-            shutil.move(download+filename, save_folder+filename)
+            
+            driver.save_screenshot("screenshots/"+id+'.png')
 
         except:
             continue
