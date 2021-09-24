@@ -46,7 +46,6 @@ def write_csv(metadata, logfile, dir="csv/", ids=[]):
     csv_file_content = ""
     headers = "Filename; Title/caption;	Date inscription/object;	Date photo/drawing text;	Date photo/drawing Y-M-D;	Date photo/drawing to;	Agent 1;	Role of Agent 1;	Agent 2;	Role of Agent 2;	Owner;	References;   ;  Notes;   monument-id;	classification-id;	classification-text;	Agent 3;	Date scan/digitization;	image-licence;	image-right-url;	image-rights-text;	heiDATA-link;	heiDOK-link;\n"
    
-   
     csv_file_content += headers
     for item in metadata:
         try:
@@ -72,9 +71,9 @@ def write_csv(metadata, logfile, dir="csv/", ids=[]):
 
     now = datetime.now().strftime("%Y-%m-%d_%H-%M")
     if using_mon_ids:
-        filename = "danam_metadata_select_{}.csv".format(now)
+        filename = "image_metadata_select_{}.csv".format(now)
     else:
-        filename = "danam_metadata_all_{}.csv".format(now)
+        filename = "image_metadata_all_{}.csv".format(now)
         
     file = codecs.open(dir+filename, 'w', 'utf-8')
     file.write(csv_file_content)
@@ -93,21 +92,21 @@ def danam_to_csv(filename, dir="csv/", report=False, ids=[]):
     log = "log/writecsv.log"
     logfile = codecs.open(log, 'w', 'utf-8')
     
-    metadata = json.load(open("json/"+filename))
-    metadata_report = json.load(open("json/report_"+filename))
+    image_metadata = json.load(open(filename))
+    report_metadata = json.load(open(filename.replace("image_", "report_")))
 
     if not report:
         if len(ids) > 0:
-            write_csv(metadata, logfile, dir, ids)
+            write_csv(image_metadata, logfile, dir, ids)
         else:
-            write_csv(metadata, logfile, dir)
+            write_csv(image_metadata, logfile, dir)
         
         
     if report:
         if len(ids) > 0:
-            write_csv_report_metadata(metadata_report, dir)
+            write_csv_report_metadata(report_metadata, logfile, dir, ids)
         else:
-            write_csv_report_metadata(metadata_report, dir)
+            write_csv_report_metadata(report_metadata, logfile, dir)
     
     
     logfile.close()

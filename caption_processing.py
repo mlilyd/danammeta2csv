@@ -145,7 +145,6 @@ def get_agent_role_classification(textfield_part, image_metadata):
     if "photo by" in textfield_part or "photography by"  in textfield_part:
         classification_and_agent = textfield_part.split('by')
         #print(classification_and_agent)
-        agents = classification_and_agent[1].split(',')
         for item in agents:
             item.replace(" ", "")
             item.lstrip(' ')

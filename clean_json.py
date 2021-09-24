@@ -10,10 +10,10 @@ from caption_processing import metadata_from_caption, valid_caption
 exports image array as a json file that can easily be re-imported into python and used again for other scripts. JSON is named
     'danam_metadata_<export date>_<export time>.json'
 '''
-def write_json(array, dir="json/"):
+def write_json(array, dir="json/cleaned-metadata/"):
     now = datetime.now().strftime("%Y-%m-%d_%H-%M")
     #filename = "danam_metadata_{}.json".format(now)
-    filename = "cleaned_metadata_{}.json".format(now)
+    filename = "{}.json".format(now)
     with open(dir+filename, 'w') as file:
         json.dump(array, file)
 
@@ -187,6 +187,7 @@ replace text using rules in a dictionary
 input:
     text - text where substrings need to be replacedd
     dict - dictionary
+    strip - Bool value, False does not strip white spaces in dict keys
 output:
     none
 '''
@@ -229,7 +230,7 @@ def clean_json(danam_export, verbose=False, fix=True):
         parts = caption.split(';')
 
         if not valid_caption(caption) or len(parts) < 3:
-            logfile.write("{}\"\n is not a valid caption!\n".format(caption))
+            logfile.write("\"{}\"\n is not a valid caption!\n".format(caption.replace("\n", "")))
             if verbose:
                 print("\"{}\"\n is not a valid caption!\n".format(caption))
             
@@ -238,9 +239,9 @@ def clean_json(danam_export, verbose=False, fix=True):
             
                 
         else:
-            logfile.write("Caption is correct and is being processed...\n")
-            if verbose:
-                print("Caption is correct and is being processed...\n")
+            #logfile.write("Caption is correct and is being processed...\n")
+            #if verbose:
+            #    print("Caption is correct and is being processed...\n")
       
             image_metadata = get_metadata(image, parts)
             mon_id = image_metadata['mon_id']
@@ -249,8 +250,8 @@ def clean_json(danam_export, verbose=False, fix=True):
                 prev_mon_id = mon_id
                 metadata_report.append(image_metadata)
     
-    write_json(metadata) 
-    write_json(metadata_report, dir="json/report_")
+    write_json(metadata, dir="json/cleaned-metadata/image_") 
+    write_json(metadata_report, dir="json/cleaned-metadata/report_")
 
             
     logfile.write("Images from DANAM: {}\nImages exported to CSV: {}\n".format(len(images), len(metadata)))

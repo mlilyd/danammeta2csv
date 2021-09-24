@@ -63,7 +63,10 @@ exports pre-processed image metadata array into csv file for importing DANAM Rep
     'danam_report_metadata_<export date>_<export time>.csv'
 if optional parameter dir is not given, the csv will be written in the same folder as the python script
 '''
-def write_csv_report_metadata(metadata, dir=".\\"):
+def write_csv_report_metadata(metadata, logfile, dir=".\\", ids=[]):
+    
+    using_mon_ids = (len(ids)>0)
+    
     csv_file_content = ""
     headers = "Dateiname;   Name (Title/Object);	Klassifikation;	Klassifikationsname;	Lokale Systematik;	Rechteinhaber"
     
@@ -72,6 +75,10 @@ def write_csv_report_metadata(metadata, dir=".\\"):
     for item in metadata:
         try:
             
+            if using_mon_ids and item['mon_id'] not in ids:
+                logfile.write("Skipping this item because {} is not in mon_ids.txt.\n".format(item['mon_id']))
+                continue
+        
             editorial_text, t_n = editors_to_csv(item['editorial'])
             if t_n > t_o:
                 t_o = t_n
@@ -80,9 +87,9 @@ def write_csv_report_metadata(metadata, dir=".\\"):
             csv_file_content += '\"'+item['mon_id']+'\"'+";" + '\"'+"Nepal Heritage Documentation Project"+'\"'+";" + editorial_text + "\n" 
             
         except:
-            #csv_file_content += '\n'
-            #print("Key Error! This image entry only has the following keys:\n{}".format('\n'.join(item.keys())))
+            logfile.write("Key Error! Image entry \'{}\' only has the following keys:\n{}".format( item['filename'],'\n'.join(item.keys())))
             pass
+    
     
     for i in range(0, t_o+1):
         headers += ";   Künstler/Urheber/Hersteller (normiert);   Rolle"
@@ -91,7 +98,10 @@ def write_csv_report_metadata(metadata, dir=".\\"):
     csv_file_content = headers + csv_file_content
     
     now = datetime.now().strftime("%Y-%m-%d_%H-%M")
-    filename = "danam_report_metadata_{}.csv".format(now)
+    if using_mon_ids:
+        filename = "report_metadata_select_{}.csv".format(now)
+    else:
+        filename = "report_metadata_all_{}.csv".format(now)
     file = codecs.open(dir+filename, 'w', 'utf-8')
     file.write(csv_file_content)
     file.close()
