@@ -13,7 +13,7 @@ input: editorial text as string (e.g. '')
 output: 
 '''
 def get_editors(text):
-    text = replace_w_json(text, heidicon_id)
+    text = replace_w_json(text, heidicon_id, strip=True)
     split = [i.replace("<p>", "").replace("</p>", "").replace("&nbsp;", " ")  for i in text.split("</p><p>")]
     editors = {}
     for item in split:

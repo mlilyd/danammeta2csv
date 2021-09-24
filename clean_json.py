@@ -190,9 +190,12 @@ input:
 output:
     none
 '''
-def replace_w_json(text, dict):
+def replace_w_json(text, dict, strip=False):
     for key in dict.keys():
-        text = text.replace(key, dict[key])
+        if strip:
+            text = text.replace(key.strip(), dict[key])
+        else:            
+            text = text.replace(key, dict[key])
     
     return text
         
