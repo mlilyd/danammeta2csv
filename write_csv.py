@@ -26,7 +26,7 @@ def list_from_txt(textfile):
 
     with open(textfile, 'r', encoding="utf-8") as file:
         for line in file:
-            if line[0] == "#":
+            if line[0] == "#" or line.strip() == "" : 
                 continue
             id = line.split(" ")[0].strip()
             ids.append(id)
@@ -112,7 +112,6 @@ def danam_to_csv(filename, dir="csv/", report=False, ids=[]):
     logfile.close()
 
 if __name__ == "__main__":
-
 
     '''
     use argparser to create a command promt tool
