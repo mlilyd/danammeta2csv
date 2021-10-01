@@ -29,16 +29,21 @@ def download_images(images):
         if not os.path.isdir(DIR+mon_id):
             os.mkdir(DIR+mon_id)
         
+        img_found = False
         exts = [".png", ".jpg", ".jpeg", ".PNG", ".JPEG", ".JPG"]
         for ext in exts:
             response = requests.get(URL+image+ext)
             if response.status_code == 200:
+                img_found = True
                 img_file = Image.open(io.BytesIO(response.content))
                 img_file.save(DIR+mon_id+image+ext)
                 logfile.write("Image {} saved to {}.\n".format(image, DIR+mon_id+image+ext))
                 break
-            logfile.write("Image {} cannot be found in DANAM.\n".format(image))
             
+        if not img_found:
+            logfile.write("Image {} cannot be found on DANAM!\n".format(image))
+    
+    logfile.close()
     return 0
 
 

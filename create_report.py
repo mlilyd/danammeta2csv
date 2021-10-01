@@ -7,6 +7,8 @@ import getpass
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from write_csv import list_from_txt
+
 
 ## CONSTANT DEFINITION
 url = "https://danam.cats.uni-heidelberg.de/report/"
@@ -143,7 +145,7 @@ if __name__ == "__main__":
     
     elif args.txt != None:
         print("Reading URL from "+args.txt)
-        ids = get_url_from_txt(args.txt)
+        ids = list_from_txt(args.txt)
 
     else:
         print("No input given! Please give a csv or txt file.\nType -h for help\n")

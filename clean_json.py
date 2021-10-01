@@ -71,14 +71,27 @@ def get_caption(image):
     keys.remove('danam_id')
     keys.remove('mon_ids')
     keys.remove('editorials')
-    if '4b84aa48-9eea-11e9-8b93-0242ac120006' in keys:
+    
+    try: 
+        keys.remove("4b84bd80-9eea-11e9-8b93-0242ac120006")
         keys.remove('4b84aa48-9eea-11e9-8b93-0242ac120006')
+        keys.remove('0266d44a-9ee9-11e9-98a0-0242ac120006')
+        keys.remove('0266d44a-9ee9-11e9-98a0-0242ac120006')
+        #keys.remove("ff59de54-a321-11e9-8e7b-0242ac140004")
+        #keys.remove("ff59be60-a321-11e9-8e7b-0242ac140004")
+        #keys.remove("39e9bb98-b100-11e9-a7ae-0242ac120006 ")
+    except:
+        pass
 
     textfield = ""
     for key in keys:
         if image[key] is not None:
-            textfield += image[key] + "\n"
-
+            textfield += str(image[key]) + " "
+            
+    danam_tags = re.compile('\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}')
+    if danam_tags.search(textfield) is not None:
+        textfield = danam_tags.sub('', textfield)
+    
     textfield.replace("&nbsp;", " ")
     textfield = html.unescape(textfield)
 

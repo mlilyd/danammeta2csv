@@ -31,7 +31,7 @@ def list_from_txt(textfile):
             id = line.split(" ")[0].strip()
             ids.append(id)
 
-    return set(ids)
+    return ids
 
 
 '''

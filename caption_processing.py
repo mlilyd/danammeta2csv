@@ -92,6 +92,10 @@ def valid_caption(caption):
                 "; existing section",
                 "; restored section",
                 "; southern elevation",
+                "; south elevation by",
+                "; west elevation by",
+                "; north elevation by",
+                "; east elevation by",
                 "; eastern elevation",
                 "; east elevation",
                 "; top view",
@@ -133,6 +137,8 @@ def get_date(textfield_part, image_metadata, shor_index):
 
 #agent, role, and classification processing
 def get_agent_role_classification(textfield_part, image_metadata):
+    
+    
     image_metadata['agent'] = ""
     image_metadata['role'] = ""
     image_metadata['agent2'] = ""
@@ -144,19 +150,22 @@ def get_agent_role_classification(textfield_part, image_metadata):
     #falls foto
     if "photo by" in textfield_part or "photography by"  in textfield_part:
         classification_and_agent = textfield_part.split('by')
+        agents = classification_and_agent[1:]
         #print(classification_and_agent)
-        for item in agents:
+        for item in classification_and_agent:
             item.replace(" ", "")
             item.lstrip(' ')
             item.lstrip()
             item.strip('&nbsp;')
 
 
-        try:
-            image_metadata['agent'] = heidicon_id[agents[0]]
-        except Exception as e:
-            image_metadata['agent'] = agents[0]
-            pass
+        
+        if len(agents) > 0 :
+            try:
+                image_metadata['agent'] = heidicon_id[agents[0]]
+            except Exception as e:
+                image_metadata['agent'] = agents[0]
+                pass
 
         #role_agent1
         classification = classification_and_agent[0].strip().lower().lstrip(' ')
@@ -191,12 +200,19 @@ def get_agent_role_classification(textfield_part, image_metadata):
     else:
         classification = 'architectural drawing'
         classification_and_agent = textfield_part.split('by')
-
+        
         try:
             agents = classification_and_agent[1].split(',')
+        except:
+            agents = []
+    
+        
+        try:
             image_metadata['agent'] = heidicon_id[agents[0]]
         except Exception as e:
-            pass
+            if len(agents)<0:
+                image_metadata['agent'] = agents[0]
+        
 
         role = "draftsman"
         image_metadata["role"] = role
@@ -224,6 +240,8 @@ def get_agent_role_classification(textfield_part, image_metadata):
         if "sketch" in image_metadata["caption"]:
             classification = "sketch"
 
+            
+            
     if classification != "":
         image_metadata['classification'] = classification
 
@@ -315,8 +333,16 @@ def metadata_from_caption(textfield_parts, image_metadata):
     short_index=0
     get_date(textfield_parts[2], image_metadata, short_index)
 
-    get_agent_role_classification(textfield_parts[1], image_metadata)
+   
 
+    get_agent_role_classification(textfield_parts[1], image_metadata)
+    '''
+    if image_metadata['mon_id']=='BAL0009':
+        agent_text = open("log/agent_bug.txt", 'a')
+        agent_text.write(textfield_parts[1]+"\n")
+        agent_text.write("{}, {}, {}, {}\n".format(image_metadata['agent'], image_metadata['role'], image_metadata['agent2'], image_metadata['role2']))
+        agent_text.close()
+    '''
     classification = image_metadata['classification']
     get_copyright_etc(textfield_parts, image_metadata, short_index, classification)
 
@@ -334,5 +360,3 @@ if __name__ == '__main__':
             print("Caption is correct and is being processed...")
             image_metadata = {}
             metadata_from_caption(parts, image_metadata)
-
-            #print("Processing completed! The following information was extracted:\n{}".format("\n".join(image_metadata.keys())))

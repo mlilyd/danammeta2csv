@@ -68,7 +68,7 @@ def write_csv_report_metadata(metadata, logfile, dir=".\\", ids=[]):
     using_mon_ids = (len(ids)>0)
     
     csv_file_content = ""
-    headers = "Dateiname;   Name (Title/Object);	Klassifikation;	Klassifikationsname;	Lokale Systematik;	Rechteinhaber"
+    headers = "filename;   title;	klassifikation_gnd; ; systematik;	res_rechteinhaber_text;	res_lizenz"
     
     t_o = 0
     #csv_file_content += headers
@@ -83,8 +83,11 @@ def write_csv_report_metadata(metadata, logfile, dir=".\\", ids=[]):
             if t_n > t_o:
                 t_o = t_n
             
-            csv_file_content += '\"'+"DANAM - {}.pdf".format(item['mon_id'])+'\"'+";" + '\"'+"Report {}".format(item['mon_id'])+'\"'+";" + '\"'+"4177815-7"+'\"'+";" + '\"'+"Report"+'\"'+";"
-            csv_file_content += '\"'+item['mon_id']+'\"'+";" + '\"'+"Nepal Heritage Documentation Project"+'\"'+";" + editorial_text + "\n" 
+            csv_file_content += '\"'+"DANAM - {}.pdf".format(item['mon_id'])+'\"'+";" + '\"'+"Report {}".format(item['mon_id'])+'\"'+";" + "\"4177815-7\"; \"\"; "
+
+            csv_file_content += '\"'+item['mon_id']+'\"'+";" + '\"'+"Nepal Heritage Documentation Project"+'\"'+";" + '\"'+"CC BY-SA 4.0"+'\"'+";" 
+            
+            csv_file_content += editorial_text + "\n" 
             
         except:
             logfile.write("Key Error! Image entry \'{}\' only has the following keys:\n{}".format( item['filename'],'\n'.join(item.keys())))
