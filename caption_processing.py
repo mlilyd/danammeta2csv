@@ -100,7 +100,10 @@ def valid_caption(caption):
                 "; east elevation",
                 "; top view",
                 "; elevation",
-                "; roof plan"]
+                "; roof plan",
+                '; plan by',
+                '; basement plan by',
+                'proposed for restoration by']
 
     for key in keywords:
         if key in caption:

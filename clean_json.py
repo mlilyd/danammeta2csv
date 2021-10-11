@@ -105,10 +105,20 @@ def get_caption(image):
             if "If not otherwise stated" not in textfield_paragraph[index]:
                 text_index = index
         textfield = textfield_paragraph[text_index]
+    
+    to_remove = "If not otherwise stated, all images and texts in this monument folder are published under Creative Commons Attribution 4.0 License (CC BY-SA 4.0), and the copyright lies with NHDP. All visuals of this monument folder and more are (or will be) also stored in heidICON, the object and multimedia database of Heidelberg University. (Type the ID-number or key words in the first line and click the search field.) You will also find the initial report there. The latest report will always be available in DANAM (this page)"
+
+    textfield = textfield.replace(to_remove, "")
+
+    to_remove = "If not otherwise stated, all images and texts in this folder are published under Creative Commons Attribution 4.0 License (CC BY-SA 4.0), and the copyright lies with NHDP. All visuals of this monument folder and more are (or will be) also stored in heidICON, the object and multimedia database of Heidelberg University (type the ID-number or key words in the first line and click the search field). You will also find the initial report there. The latest report will always be available in DANAM (this page)."
+
+    textfield = textfield.replace(to_remove, "")
+
     #'''
 
     if "(CC BY-SA 4.0)." in textfield:
         textfield = textfield.split('(CC BY-SA 4.0).')[1].strip()
+
 
     return textfield
 
