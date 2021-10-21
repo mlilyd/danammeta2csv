@@ -37,6 +37,28 @@ licence_dict = {
 }
 
 ##############################################
+'''
+read monument URL id from a simple txt file (one id per line). 
+IDs can be commented as follows:
+
+017a4a8f-b183-4e57-9ff9-54ae1145378f #LAL1870
+60a8a8e0-e4e8-11e9-b125-0242ac130002 #LAL4250
+cfc0099e-f15d-4c3e-8d8f-e048222f7956 #KIR0020
+
+IDs can be commented python-wise with #
+
+'''
+def list_from_txt(textfile):
+    ids = []
+
+    with open(textfile, 'r', encoding="utf-8") as file:
+        for line in file:
+            if line[0] == "#" or line.strip() == "" : 
+                continue
+            id = line.split(" ")[0].strip()
+            ids.append(id)
+
+    return ids
 
 
 #check date format, must follow DANAM guidelines
@@ -60,55 +82,12 @@ def isDate(date):
 
 #check caption for keywords
 def valid_caption(caption):
-    keywords = ["; photo by",
-                ";photo by",
-                "; location map by",
-                "; site plan by",
-                ";location map by",
-                ";site plan by",
-                "; location map",
-                "drawing by",
-                "; floor plan",
-                "; view from",
-                "; photography by",
-                ";floor plan",
-                "; first floor plan",
-                "; elevation drawing",
-                ";view from",
-                ";photography by",
-                "; photograph by",
-                ";sketch by",
-                "; sketch by",
-                "; section",
-                "; ground floor plan",
-                "; existing ground floor plan",
-                "; existing first floor plan",
-                "; existing second floor plan",
-                "; restored ground floor plan",
-                "; restored first floor plan",
-                "; restored second floor plan",
-                "; existing elevation",
-                "; restored elevation",
-                "; existing section",
-                "; restored section",
-                "; southern elevation",
-                "; south elevation by",
-                "; west elevation by",
-                "; north elevation by",
-                "; east elevation by",
-                "; eastern elevation",
-                "; east elevation",
-                "; top view",
-                "; elevation",
-                "; roof plan",
-                '; plan by',
-                '; basement plan by',
-                'proposed for restoration by']
-
-    for key in keywords:
-        if key in caption:
+    keywords = list_from_txt("log/keywords.txt")
+    for keyword in keywords:
+        pattern_search = re.search(keyword, caption)
+        if pattern_search is not None:
             return True
-    #print("No keywords found...")
+    
     return False
 
 #date processing

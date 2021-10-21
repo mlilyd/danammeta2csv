@@ -30,7 +30,7 @@ def read_danam_export(danam_export):
     for object in source_json["business_data"]["resources"]:
         danam_id = object['resourceinstance']['resourceinstanceid']
         mon_ids = [tile["data"]["28294784-9323-11e9-bf23-0242ac120006"] for tile in object['tiles'] if '28294784-9323-11e9-bf23-0242ac120006' in tile['data'].keys()]
-        editorials= [tile["data"]["66fd9c70-ce1b-11e9-b993-0242ac140002"] for tile in object['tiles'] if '66fd9c70-ce1b-11e9-b993-0242ac140002' in tile['data'].keys()]
+        #editorials= [tile["data"]["66fd9c70-ce1b-11e9-b993-0242ac140002"] for tile in object['tiles'] if '66fd9c70-ce1b-11e9-b993-0242ac140002' in tile['data'].keys()]
 
 
 
@@ -53,7 +53,7 @@ def read_danam_export(danam_export):
                 jsonrawdata = ast.literal_eval(jsonstr)
                 jsonrawdata['danam_id'] = danam_id
                 jsonrawdata['mon_ids'] = mon_ids
-                jsonrawdata['editorials'] = editorials
+                #jsonrawdata['editorials'] = editorials
                 res.append(jsonrawdata)
 
     return res
@@ -70,7 +70,7 @@ def get_caption(image):
     keys.remove('imagedata')
     keys.remove('danam_id')
     keys.remove('mon_ids')
-    keys.remove('editorials')
+    #keys.remove('editorials')
     
     try: 
         keys.remove("4b84bd80-9eea-11e9-8b93-0242ac120006")
@@ -144,9 +144,9 @@ def metadata_from_json(image_json, image_metadata):
         image_metadata['filename'] = filename_ending.sub('', image_metadata['filename_danam'])
 
     #get editorial
-    image_metadata['editorial'] = ""
-    for editorial in image_json['editorials']:
-        image_metadata['editorial'] = editorial.strip().replace("\n", "").replace(",,", ", ")
+    #image_metadata['editorial'] = ""
+    #for editorial in image_json['editorials']:
+    #    image_metadata['editorial'] = editorial.strip().replace("\n", "").replace(",,", ", ")
 
     #get reports
     image_metadata['report_url'] = image_json['danam_id']
