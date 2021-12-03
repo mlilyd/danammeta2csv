@@ -28,7 +28,7 @@ def read_danam_export(danam_export):
 
     res = []
     for object in source_json["business_data"]["resources"]:
-        danam_id = object['resourceinstance']['resourceinstanceid']
+        #danam_id = object['resourceinstance']['resourceinstanceid']
         mon_ids = [tile["data"]["28294784-9323-11e9-bf23-0242ac120006"] for tile in object['tiles'] if '28294784-9323-11e9-bf23-0242ac120006' in tile['data'].keys()]
         #editorials= [tile["data"]["66fd9c70-ce1b-11e9-b993-0242ac140002"] for tile in object['tiles'] if '66fd9c70-ce1b-11e9-b993-0242ac140002' in tile['data'].keys()]
 
@@ -51,7 +51,7 @@ def read_danam_export(danam_export):
                 jsonstr = TAG_RE.sub('', jsonstr)
 
                 jsonrawdata = ast.literal_eval(jsonstr)
-                jsonrawdata['danam_id'] = danam_id
+                #jsonrawdata['danam_id'] = danam_id
                 jsonrawdata['mon_ids'] = mon_ids
                 #jsonrawdata['editorials'] = editorials
                 res.append(jsonrawdata)
@@ -68,7 +68,7 @@ output: caption as one string variable, textfield
 def get_caption(image):
     keys = list(image.keys())
     keys.remove('imagedata')
-    keys.remove('danam_id')
+    #keys.remove('danam_id')
     keys.remove('mon_ids')
     #keys.remove('editorials')
     
@@ -113,6 +113,7 @@ def get_caption(image):
     to_remove = "If not otherwise stated, all images and texts in this folder are published under Creative Commons Attribution 4.0 License (CC BY-SA 4.0), and the copyright lies with NHDP. All visuals of this monument folder and more are (or will be) also stored in heidICON, the object and multimedia database of Heidelberg University (type the ID-number or key words in the first line and click the search field). You will also find the initial report there. The latest report will always be available in DANAM (this page)."
 
     textfield = textfield.replace(to_remove, "")
+    textfield = textfield.replace("\n", " ")
 
     #'''
 
@@ -131,7 +132,7 @@ image_metadata - metadata dictionary
 def metadata_from_json(image_json, image_metadata):
 
 
-    image_metadata['danam_id'] = image_json['danam_id']
+    #image_metadata['danam_id'] = image_json['danam_id']
     #get filename
     #separates name and file extension, but file extension remains.
     image_metadata['filename_danam'] = os.path.splitext(image_json['imagedata'][0]['name'])[0].replace(' ', '_')
@@ -149,7 +150,7 @@ def metadata_from_json(image_json, image_metadata):
     #    image_metadata['editorial'] = editorial.strip().replace("\n", "").replace(",,", ", ")
 
     #get reports
-    image_metadata['report_url'] = image_json['danam_id']
+    #image_metadata['report_url'] = image_json['danam_id']
     #image_metadata['report_url'] = image_json['notegroup_id']
 
     #get mon_id

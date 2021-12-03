@@ -2,8 +2,8 @@ import os
 import time
 import json
 import shutil
-import argparse
 import getpass
+from textwrap import dedent
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -21,68 +21,68 @@ if os.name == "posix": #LINUX
 
 else: #WINDOWS
     download = "C:\\Users\\{}\\Downloads\\".format(username) 
-    save_folder = "C:\\Users\\{}\\Documents\\DANAM Reports\\".format(username) 
+    save_folder = "C:\\Users\\{}\\Seafile\\Transfers\\".format(username) 
+
+
 
 
 '''
-read monument URL id from metadata csv
+from https://gist.github.com/munro/7f81bd1657499866f7c2
 '''
-def get_url_from_csv(csv):
-    ids = []
-    firstline = True
-    
-    with open(csv, 'r', encoding="utf8") as file:
-        for line in file:
-            line = file.readline()
-            
-            #skip first line (headers)
-            if firstline:
-                firstline = False
+def wait_until_images_loaded(driver, timeout=30):
+    """Waits for all images & background images to load."""
+    driver.set_script_timeout(timeout)
+    driver.execute_async_script(dedent('''
+        function extractCSSURL(text) {
+            var url_str = text.replace(/.*url\((.*)\).*/, '$1');
+            if (url_str[0] === '"') {
+                return JSON.parse(url_str);
+            }
+            if (url_str[0] === "'") {
+                return JSON.parse(
+                    url_str
+                        .replace(/'/g, '__DOUBLE__QUOTE__HERE__')
+                        .replace(/"/g, "'")
+                        .replace(/__DOUBLE__QUOTE__HERE__/g, '"')
+                );
+            }
+            return url_str;
+        }
+        function imageResolved(url) {
+            return new $.Deferred(function (d) {
+                var img = new Image();
+                img.onload = img.onload = function () {
+                    d.resolve(url);
+                };
+                img.src = url;
+                if (img.complete) {
+                    d.resolve(url);
+                }
+            }).promise();
+        }
+        var callback = arguments[arguments.length - 1];
+        $.when.apply($, [].concat(
+            $('img[src]')
+                .map(function (elem) { return $(this).attr('src'); })
+                .toArray(),
+            $('[style*="url("]')
+                .map(function () { return extractCSSURL($(this).attr('style')); })
+                .toArray()
+                .map(function (url) { return imageResolved(url); })
+        )).then(function () { callback(arguments); });
+        return undefined;
+    '''))
 
-            else:
-                #try to get the id (2nd element from the back)
-                try:
-                    id = line.split(";")[-2].replace('\"', '')
-                    ids.append(id)
-                except:
-                    continue
-
-    #turn ids array into set to remove duplicates
-    ids = set(ids)
-    return ids
-
-'''
-read monument URL id from a simple txt file (one id per line). 
-IDs can be commented as follows:
-
-017a4a8f-b183-4e57-9ff9-54ae1145378f #LAL1870
-60a8a8e0-e4e8-11e9-b125-0242ac130002 #LAL4250
-cfc0099e-f15d-4c3e-8d8f-e048222f7956 #KIR0020
-
-IDs can be commented python-wise with #
-
-'''
-def list_from_txt(textfile):
-    ids = []
-
-    with open(textfile, 'r', encoding="utf-8") as file:
-        for line in file:
-            if line[0] == "#":
-                continue
-            id = line.split(" ")[0].strip()
-            ids.append(id)
-
-    return set(ids)
 
 '''
 start chromedriver with setting for printing to pdf
 '''
-def chromedriver_init():
+def chromedriver_init(chromedriverpath = 'chromedriver'):
 
     if os.name == "posix":
-        CHROMEDRIVER_PATH = './chromedriver'
+        CHROMEDRIVER_PATH = './{}'.format(chromedriverpath)
     else:
-        CHROMEDRIVER_PATH = './chromedriver.exe'
+        CHROMEDRIVER_PATH = './{}.exe'.format(chromedriverpath)
         
     options = Options()
     appState = {
@@ -98,9 +98,10 @@ def chromedriver_init():
         }
 
     profile = {'printing.print_preview_sticky_settings.appState': json.dumps(appState)}
-    #profile = {'printing.print_preview_sticky_settings.appState':json.dumps(appState),'download.default_directory':downloadPath}
+    profile = {'printing.print_preview_sticky_settings.appState':json.dumps(appState),'download.default_directory':download}
     options.add_experimental_option('prefs', profile)
     options.add_argument('--kiosk-printing')
+    #options.add_argument('--headless')
 
     driver = webdriver.Chrome(options=options, executable_path=CHROMEDRIVER_PATH)
     return driver
@@ -108,53 +109,25 @@ def chromedriver_init():
 '''
 get reports from id
 '''
-def get_reports(ids, driver):
-    for id in ids:
+def get_reports(df_iterrows, driver):
+    for mon in df_iterrows:
         try:
-            driver.get(url+id)
+            url_id = mon[1]['danam_url']
+            mon_id = mon[1]['mon_id']
+            driver.get(url+url_id)
             print(driver.title + " loaded.")
-            time.sleep(10)
             
-            driver.save_screenshot("screenshots/"+id+'.png')
-
+            time.sleep(30)
+            wait_until_images_loaded(driver)
+            driver.execute_script('window.print();')
+            
+            filename = "DANAM - {}.pdf".format(mon_id)
+            shutil.move(download+driver.title+".pdf", save_folder+filename)
+            print(filename + " downloaded.")
+            #break
+            
         except:
             continue
 
     driver.quit()
 
-if __name__ == "__main__":
-
-    argparser = argparse.ArgumentParser(description="Get DANAM report as a PDF using automated Chrome")
-
-    argparser.add_argument("-csv", required=False, type=str, help="metadata csv to read URL id from")
-    argparser.add_argument("-txt", required=False, type=str, help="textfile to read URL id from")
-    argparser.add_argument("-save_folder", required=False, type=str, help="save folder, if not specified, saves at ./report")
-    
-    args = argparser.parse_args()
-
-
-    if args.save_folder != None:
-        save_folder = args.save_folder
-
-    if not os.path.isdir(save_folder):
-        os.mkdir(save_folder)
-
-    if args.csv != None:
-        print("Reading URL from "+args.csv)
-        ids = get_url_from_csv(args.csv)
-    
-    elif args.txt != None:
-        print("Reading URL from "+args.txt)
-        ids = list_from_txt(args.txt)
-
-    else:
-        print("No input given! Please give a csv or txt file.\nType -h for help\n")
-        ids = []
-
-    if len(ids) > 0:
-        print("Default Downloads folder: " + download)
-        print("Reports will be saved to: " + save_folder)
-        print("Starting Chrome...")
-        driver = chromedriver_init()
-        print("Chrome started.")
-        get_reports(ids, driver)
