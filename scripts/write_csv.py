@@ -3,7 +3,7 @@ import codecs
 import argparse
 
 from datetime import datetime
-from create_report_csv import write_csv_report_metadata
+#from create_report_csv import write_csv_report_metadata
 
 
 

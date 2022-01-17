@@ -5,7 +5,7 @@ import re, os, ast
 from datetime import datetime
 
 
-from caption_processing import metadata_from_caption, valid_caption
+from scripts.caption_processing import metadata_from_caption, valid_caption
 '''
 exports image array as a json file that can easily be re-imported into python and used again for other scripts. JSON is named
     'danam_metadata_<export date>_<export time>.json'
@@ -106,7 +106,7 @@ def get_caption(image):
                 text_index = index
         textfield = textfield_paragraph[text_index]
     
-    to_remove = "If not otherwise stated, all images and texts in this monument folder are published under Creative Commons Attribution 4.0 License (CC BY-SA 4.0), and the copyright lies with NHDP. All visuals of this monument folder and more are (or will be) also stored in heidICON, the object and multimedia database of Heidelberg University. (Type the ID-number or key words in the first line and click the search field.) You will also find the initial report there. The latest report will always be available in DANAM (this page)"
+    to_remove = "If not otherwise stated, all images and texts in this monument folder are published under Creative Commons Attribution 4.0 License (CC BY-SA 4.0), and the copyright lies with NHDP. All visuals of this monument folder and more are (or will be) also stored in heidICON, the object and multimedia database of Heidelberg University. (Type the ID-number or key words in the first line and click the search field.) You will also find the initial report there. The latest report will always be available in DANAM (this page)."
 
     textfield = textfield.replace(to_remove, "")
 
@@ -114,6 +114,27 @@ def get_caption(image):
 
     textfield = textfield.replace(to_remove, "")
     textfield = textfield.replace("\n", " ")
+
+    fixes = ["If not otherwise stated, all images and texts in this folder are published under Creative Commons"
+            , "If not otherwise stated, all images and texts in this monument folder are published under Creative Commons"
+            , "Attribution 4.0 License \(CC BY-SA 4.0\),"
+            , "Attribution 40 License \(CC BY-SA 40\),"
+            , "and the copyright lies with NHDP. All visuals of this monument folder"
+            ," and more are \(or will be\) also stored in heidICON," 
+            , "and more are also stored in heidICON,"
+            , "the object and multimedia database of Heidelberg University" 
+            , "\(Type the ID-number or key words in the first line and click the search field.\)" 
+            , "\(type the ID-number or key words in the first line and click the search field.\)" 
+            , "\(type the ID-number or key words in the first line and click the search field\)" 
+            , "\(type the ID-number or keywords in the first line and click the search field\)." 
+            , "You will also find the initial report there"
+            , "The latest report will always be available in DANAM \(this page\)."
+            , "You will also find the initial report there. The latest report will always be available in DANAM \(this page\)."
+            , "."
+            ]
+    
+    for fix in fixes:
+        textfield = textfield.replace(fix, "")
 
     #'''
 
@@ -233,7 +254,7 @@ input:
 output:
 
 '''
-def clean_json(danam_export, verbose=False, fix=True):
+def clean_json_old(danam_export, verbose=False, fix=True):
     images = read_danam_export(danam_export)
     metadata = []
     metadata_report = []
@@ -249,8 +270,9 @@ def clean_json(danam_export, verbose=False, fix=True):
     
         if fix:
             fixes = json.load(open('json/dict/fixes.json'))[0]
-            caption = replace_w_json(caption, fixes)    
-        
+            caption = replace_w_json(caption, fixes)
+            caption = re.sub(r': ([0-9]{4}-[0-9]{2}-[0-9]{2})', r'; \1 ;', caption)
+
         parts = caption.split(';')
 
         if not valid_caption(caption) or len(parts) < 3:
@@ -283,6 +305,60 @@ def clean_json(danam_export, verbose=False, fix=True):
     
     logfile.close()
 
+'''
+'''
+def clean_json(danam_export):
+    # collect only danam images
+    danam_images = read_danam_export(danam_export)
+
+    # cleaning and geting metadata
+    for image in danam_images:
+        image['danam_caption'] = get_caption(image).replace("\n", '')
+        
+        to_delete = "If not otherwise stated, all images and texts in this monument folder are published under Creative Commons Attribution 4.0 License (CC BY-SA 4.0), and the copyright lies with NHDP. All visuals of this monument folder and more are (or will be) also stored in heidICON, the object and multimedia database of Heidelberg University. (Type the ID-number or key words in the first line and click the search field.) You will also find the initial report there. The latest report will always be available in DANAM (this page)"
+        image['danam_caption'] = image['danam_caption'].replace(to_delete, "")
+        image['empty_column'] = ""   
+        metadata_from_json(image, image)
+
+        if image['filename'] == 'KIR0067_I_003_20210907_01':
+            image['filename'] = image['filename'].replace("7_01", "7")
+            image['filename_danam'] = image['filename']
+
+        caption = image['danam_caption']
+        
+        fixes = json.load(open('json/dict/fixes.json'))[0]
+        caption = replace_w_json(caption, fixes)
+        #caption = caption.translate(str.maketrans(fixes))
+        caption = re.sub(r': ([0-9]{4}-[0-9]{2}-[0-9]{2})', r'; \1', caption)
+        caption = re.sub(r', ([0-9]{4}-[0-9]{2}-[0-9]{2})', r'; \1', caption)
+        caption = re.sub(r'; ([0-9]{4}), courtesy', r'; \1; courtesy', caption)
+        image['validCaption'] = valid_caption(caption)
+        #image['old_validCaption'] = valid_caption(caption)
+
+        parts = caption.split(';')
+
+        if image['validCaption'] and len(parts)>=3:
+            metadata_from_caption(parts, image)
+        else:
+            image['validCaption'] = False     
+    
+            
+        image['lastModified'] = image['imagedata'][0]['lastModified']
+        timestamp = int(image['lastModified'])
+        image['lastModified'] = datetime.fromtimestamp(timestamp/1000)
+        
+        try:
+            del image['imagedata']
+            #del image['editorials']
+            del image['mon_ids']
+        except: 
+            pass
+        
+        dels = [key for key in image.keys() if image[key]==None]
+        for i in dels:
+            del image[i]
+
+    return danam_images
 
 if __name__ == "__main__":
 

@@ -19,15 +19,15 @@ def get_image(image_url, filename):
     
 '''
 '''
-def download_images(images): 
+def download_images(images, dir=DIR): 
     log = "log/downloads.log"
     logfile = codecs.open(log, 'w', 'utf-8')
     
     for image in images:
         mon_id = image.split("_")[0].split("-")[0]+"/"
         
-        if not os.path.isdir(DIR+mon_id):
-            os.mkdir(DIR+mon_id)
+        if not os.path.isdir(dir+mon_id):
+            os.mkdir(dir+mon_id)
         
         img_found = False
         exts = [".png", ".jpg", ".jpeg", ".PNG", ".JPEG", ".JPG"]
@@ -36,8 +36,8 @@ def download_images(images):
             if response.status_code == 200:
                 img_found = True
                 img_file = Image.open(io.BytesIO(response.content))
-                img_file.save(DIR+mon_id+image+ext)
-                logfile.write("Image {} saved to {}.\n".format(image, DIR+mon_id+image+ext))
+                img_file.save(dir+mon_id+image+ext)
+                logfile.write("Image {} saved to {}.\n".format(image, dir+mon_id+image+ext))
                 break
             
         if not img_found:
@@ -55,7 +55,11 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser(description="download missing images from DANAM")
 
     argparser.add_argument("-f", "--file", required=True, help="textfile with all images that need to be downloaded")
+    argparser.add_argument("-d", "--dir", required=False, help="directory where the images will be saved in")
     args = argparser.parse_args()
     
     images = list_from_txt(args.file)
-    download_images(images)
+    if args.dir is not None:
+        download_images(images, args.dir)
+    else:
+        download_images(images)
