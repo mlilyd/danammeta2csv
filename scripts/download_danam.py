@@ -8,7 +8,7 @@ from PIL import Image, UnidentifiedImageError
 from write_csv import list_from_txt
 
 URL = "https://danam.cats.uni-heidelberg.de/files/uploadedfiles/"
-DIR = "C:\\Users\\l7d\\Seafile\\Transfers\\"
+DIR = "C:\\Users\\l7d\\Seafile\\Transfers\\Downloads\\"
 
 '''
 '''

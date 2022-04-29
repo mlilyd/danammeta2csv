@@ -7,7 +7,7 @@ from textwrap import dedent
 
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from write_csv import list_from_txt
+#from scripts.write_csv import list_from_txt
 
 
 ## CONSTANT DEFINITION
@@ -121,7 +121,7 @@ def get_reports(df_iterrows, driver):
             wait_until_images_loaded(driver)
             driver.execute_script('window.print();')
             
-            filename = "DANAM - {}.pdf".format(mon_id)
+            filename = "DANAM_report_{}.pdf".format(mon_id)
             shutil.move(download+driver.title+".pdf", save_folder+filename)
             print(filename + " downloaded.")
             #break

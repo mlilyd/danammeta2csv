@@ -131,6 +131,7 @@ def get_caption(image):
             , "The latest report will always be available in DANAM \(this page\)."
             , "You will also find the initial report there. The latest report will always be available in DANAM \(this page\)."
             , "."
+            , "Attribution 40 License \(CC BY-SA 40\),  and more are \(or will be\) also stored in heidICON,  \(Type the ID-number or key words in the first line and click the search field\)  The latest report will always be available in DANAM \(this page\)"
             ]
     
     for fix in fixes:
@@ -157,26 +158,34 @@ def metadata_from_json(image_json, image_metadata):
     #get filename
     #separates name and file extension, but file extension remains.
     image_metadata['filename_danam'] = os.path.splitext(image_json['imagedata'][0]['name'])[0].replace(' ', '_')
-    image_metadata['filetype'] = os.path.splitext(image_json['imagedata'][0]['name'])[1].replace('.','')
-    #delete weird filename ending from DANAM
-    filename_ending = re.compile('\_(?!section)(?!Section)[a-zA-Z0-9]{7}\\b')
-    if filename_ending.search(image_metadata['filename_danam']) == '_section'== True:
+    image_metadata['filetype'] = os.path.splitext(image_json['imagedata'][0]['name'])[1].replace(' ', '_')
+
+
+    image_metadata['filename_danam_2'] = image_json['imagedata'][0]['url'].replace('/files/uploadedfiles/', '')
+    image_metadata['filetype_2'] = os.path.splitext(image_metadata['filename_danam_2'])[1].replace('.','')
+    
+    if image_metadata['filename_danam_2'] != "LAL0880_JTohn1F.jpg":
+        image_metadata['filename_danam_2'] = re.sub('_[a-zA-Z0-9]{7}.[a-zA-Z]{3}', "", image_metadata['filename_danam_2'])
+    image_metadata['filename_danam_2'] = os.path.splitext(image_metadata['filename_danam_2'])[0]
+    
+    
+    if image_metadata['filetype_2'].strip() == "":
         image_metadata['filename'] = image_metadata['filename_danam']
     else:
-        image_metadata['filename'] = filename_ending.sub('', image_metadata['filename_danam'])
+        image_metadata['filename'] = image_metadata['filename_danam_2']
 
-    #get editorial
-    #image_metadata['editorial'] = ""
-    #for editorial in image_json['editorials']:
-    #    image_metadata['editorial'] = editorial.strip().replace("\n", "").replace(",,", ", ")
 
-    #get reports
-    #image_metadata['report_url'] = image_json['danam_id']
-    #image_metadata['report_url'] = image_json['notegroup_id']
+    #delete weird filename ending from DANAM
+    #filename_ending = re.compile('\_(?!section)(?!Section)[a-zA-Z0-9]{7}\\b')
+    #if filename_ending.search(image_metadata['filename']) == '_section'== True:
+    #    image_metadata['filename'] = image_metadata['filename']
+    #else:
+    #    image_metadata['filename'] = filename_ending.sub('', image_metadata['filename'])
+
 
     #get mon_id
     image_metadata['mon_id'] = ""
-    for mon_id in image_json['mon_ids']:
+    for mon_id in [i for i in image_json['mon_ids'] if i is not None]:
         regex_search = re.search('[A-Z]{3}[0-9]{3,4}', mon_id)
         if regex_search != None:
             image_metadata['mon_id'] = mon_id
@@ -328,10 +337,11 @@ def clean_json(danam_export):
         
         fixes = json.load(open('json/dict/fixes.json'))[0]
         caption = replace_w_json(caption, fixes)
-        #caption = caption.translate(str.maketrans(fixes))
+        
         caption = re.sub(r': ([0-9]{4}-[0-9]{2}-[0-9]{2})', r'; \1', caption)
         caption = re.sub(r', ([0-9]{4}-[0-9]{2}-[0-9]{2})', r'; \1', caption)
         caption = re.sub(r'; ([0-9]{4}), courtesy', r'; \1; courtesy', caption)
+        
         image['validCaption'] = valid_caption(caption)
         #image['old_validCaption'] = valid_caption(caption)
 

@@ -69,6 +69,7 @@ def isDate(date):
                 "[0-9]{4}$",
                 "[0-9]{4}-1[0-2]$|[0-9]{4}-0[1-9]$",
                 "[0-9]{4}-[0-9]{4}$",
+                "[0-9]{4}–[0-9]{4}$",
                 "ca. [0-9]{4}$"
     ]
 
@@ -108,10 +109,15 @@ def get_date(textfield_part, image_metadata, shor_index):
         image_metadata['date'] = date
         short_index = 1
 
-    regex_date = re.search('[0-9]{4}-[0-9]{4}', date)
-    if regex_date != None:
+    regex_date_range1 = re.search('[0-9]{4}-[0-9]{4}', date)
+    if regex_date_range1 != None:
         image_metadata['date']=date.split("-")[0]
         image_metadata['date3']=date.split("-")[1]
+    
+    regex_date_range2 = re.search('[0-9]{4}–[0-9]{4}', date)
+    if regex_date_range2 != None:
+        image_metadata['date']=date.split("–")[0]
+        image_metadata['date3']=date.split("–")[1]
 
     if "ca." in image_metadata['date']:
          image_metadata['date2'] = image_metadata['date']
@@ -129,24 +135,18 @@ def get_agent_role_classification(textfield_part, image_metadata):
     classification = ""
     agents = []
 
+    classification_and_agent = textfield_part.split('by')
+
     #falls foto
     if "photo by" in textfield_part or "photography by"  in textfield_part:
-        classification_and_agent = textfield_part.split('by')
-        agents = classification_and_agent[1:]
-        #print(classification_and_agent)
-        for item in classification_and_agent:
-            item.replace(" ", "")
-            item.lstrip(' ')
-            item.lstrip()
-            item.strip('&nbsp;')
-
-
+        agents = [item.lstrip().strip("&nbsp;") for item in classification_and_agent[1:]]
         
         if len(agents) > 0 :
             try:
-                image_metadata['agent'] = heidicon_id[agents[0]]
+                image_metadata['agent'] = heidicon_id[agents[0].strip()]
             except Exception as e:
-                image_metadata['agent'] = agents[0]
+        
+                image_metadata['agent'] = agents[0].strip()
                 pass
 
         #role_agent1
@@ -164,9 +164,9 @@ def get_agent_role_classification(textfield_part, image_metadata):
         #agent 2
         if len(agents) == 2:
             try:
-                image_metadata['agent2'] = heidicon_id[agents[1]]
+                image_metadata['agent2'] = heidicon_id[agents[1].strip()]
             except Exception as e:
-                image_metadata['agent2'] = agents[1]
+                image_metadata['agent2'] = agents[1].strip()
                 pass
 
             #role_agent2
@@ -180,17 +180,16 @@ def get_agent_role_classification(textfield_part, image_metadata):
 
     #falls nicht foto
     else:
-        classification = 'architectural drawing'
-        classification_and_agent = textfield_part.split('by')
-        
+        classification = 'architectural drawing'        
         try:
             agents = classification_and_agent[1].split(',')
         except:
             agents = []
-    
+
+   
         
         try:
-            image_metadata['agent'] = heidicon_id[agents[0]]
+            image_metadata['agent'] = heidicon_id[agents[0].strip()]
         except Exception as e:
             if len(agents)<0:
                 image_metadata['agent'] = agents[0]
@@ -201,7 +200,7 @@ def get_agent_role_classification(textfield_part, image_metadata):
         #agent 2
         if len(agents) == 2:
             try:
-                image_metadata['agent2'] = heidicon_id[agents[1]]
+                image_metadata['agent2'] = heidicon_id[agents[1].strip()]
             except Exception as e:
                 image_metadata['agent2'] = agents[1]
                 pass
@@ -273,7 +272,7 @@ def get_copyright_etc(textfield_parts, image_metadata, short_index, classificati
 
     #agent3
     try:
-        image_metadata['agent3'] = heidicon_id[agent3]
+        image_metadata['agent3'] = heidicon_id[agent3.strip()]
     except Exception as e:
         image_metadata['agent3'] = agent3
         pass
@@ -309,7 +308,7 @@ the function is divided into smaller functions
 '''
 def metadata_from_caption(textfield_parts, image_metadata):
 
-    image_metadata['caption'] = textfield_parts[0].replace("\n","")
+    image_metadata['caption'] = textfield_parts[0].replace("\n","").strip()
     #classification architectural drawing subcategories
 
     short_index=0
