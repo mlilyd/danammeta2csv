@@ -8,6 +8,6 @@ def manual_fixes(df, filename):
         parts = line.split(",")
         row = int(parts[0])
         col = parts[1]
-        val = parts[2]
+        val = parts[2].replace("\n","")
         df.at[row, col] = val
     return df
