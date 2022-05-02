@@ -84,10 +84,16 @@ def get_caption(image):
         pass
 
     textfield = ""
+    notes = ""
     for key in keys:
         if image[key] is not None:
-            textfield += str(image[key]) + " "
-            
+            if textfield == "":
+                textfield += str(image[key]) + " "
+            else:
+                notes = image[key]
+                textfield += "; " + str(image[key]) + " "
+
+
     danam_tags = re.compile('\\w{8}-\\w{4}-\\w{4}-\\w{4}-\\w{12}')
     if danam_tags.search(textfield) is not None:
         textfield = danam_tags.sub('', textfield)
@@ -214,6 +220,10 @@ def metadata_from_json(image_json, image_metadata):
     notes= ""
     try:
         notes= image_json['e02c2194-b100-11e9-87e2-0242ac120006'].strip().replace('&nbsp;', ' ')
+    except Exception as e:
+        pass
+    try:
+        notes= image_json['fa9e551a-b100-11e9-b84d-0242ac120006'].strip().replace('&nbsp;', ' ')
     except Exception as e:
         pass
     image_metadata['notes'] = notes
