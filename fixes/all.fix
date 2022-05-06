@@ -1,20 +1,49 @@
-5863,date_scan,2022-03-10
-12982,date,2016
-12982,agent,1365054
-12982,role,photographer
-12983,agent,1365054
-12983,role,photographer
-12985,agent,1365054
-12985,date,2018
-12985,role,photographer
-12986,agent,1365054
-12986,role,photographer
-13574,date_scan,2021-06-17
-19855,date,1885
-19856,date,1993
-19861,agent,1174955
-19862,date,1974
-19863,agent,1243395
-19864,agent,1302326
-21773,agent,1248182
-21775,agent,1248182
+5882,caption,Jaḥdhuṃhiti view from W
+5882,agent,1173885
+5882,role,photographer
+5882,date,2022-03-03
+5882,class_code,4002855-0
+5882,classification,Architekturfotografie
+13504,caption,Mahākālī Pīṭha view from W
+13504,agent,1173868
+13504,role,photographer
+13504,date,2022-01-29
+13504,class_code,4002855-0
+13504,classification,Architekturfotografie
+21789,caption,Suntvāḥ Gaṇeśa Mandira view from SE
+21789,agent,1248182
+21789,role,photographer
+21789,date,2022-04-14
+21789,class_code,4002855-0
+21789,classification,Architekturfotografie
+22548,caption,Galay Hiti view from SW
+22548,agent,1248182
+22548,role,photographer
+22548,date,2022-03-30
+22548,class_code,4002855-0
+22548,classification,Architekturfotografie
+22596,caption,Kusi Dhvākhā Hiti view from W
+22596,agent,1248182
+22596,role,photographer
+22596,date,2022-03-30
+22596,class_code,4002855-0
+22596,classification,Architekturfotografie
+22634,caption,Aikhusi Hiti view from SE
+22634,agent,1248182
+22634,role,photographer
+22634,date,2022-03-30
+22634,class_code,4002855-0
+22634,classification,Architekturfotografie
+22613,caption,Tusinhe Hiti view from S
+22613,agent,1248182
+22613,role,photographer
+22613,date,2022-03-30
+22613,class_code,4002855-0
+22613,classification,Architekturfotografie
+13579,date_scan,2021-06-17
+19875,date,ca. 1974
+19875,agent,1258158
+19875,role,photographer
+19875,class_code,4002855-0
+19875,classification,Architekturfotografie
+19877,agent,1253062
