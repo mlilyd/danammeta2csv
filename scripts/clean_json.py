@@ -29,9 +29,9 @@ def read_danam_export(danam_export):
     res = []
     for object in source_json["business_data"]["resources"]:
         #danam_id = object['resourceinstance']['resourceinstanceid']
-        mon_ids = [tile["data"]["28294784-9323-11e9-bf23-0242ac120006"] for tile in object['tiles'] if '28294784-9323-11e9-bf23-0242ac120006' in tile['data'].keys()]
+        mon_ids = [tile["data"]["28294784-9323-11e9-bf23-0242ac120006"].strip() for tile in object['tiles'] if '28294784-9323-11e9-bf23-0242ac120006' in tile['data'].keys() and tile["data"]["28294784-9323-11e9-bf23-0242ac120006"] is not None]
+        nepali_mon_id = [tile['data']['27b69ca2-9323-11e9-a015-0242ac120006'].strip() for tile in object['tiles'] if '27b69ca2-9323-11e9-a015-0242ac120006' in tile['data'].keys() and tile['data']['27b69ca2-9323-11e9-a015-0242ac120006'] is not None]
         #editorials= [tile["data"]["66fd9c70-ce1b-11e9-b993-0242ac140002"] for tile in object['tiles'] if '66fd9c70-ce1b-11e9-b993-0242ac140002' in tile['data'].keys()]
-
 
 
         for tiles in object['tiles']:
@@ -53,6 +53,7 @@ def read_danam_export(danam_export):
                 jsonrawdata = ast.literal_eval(jsonstr)
                 #jsonrawdata['danam_id'] = danam_id
                 jsonrawdata['mon_ids'] = mon_ids
+                jsonrawdata['nepali_mon_id'] = nepali_mon_id
                 #jsonrawdata['editorials'] = editorials
                 res.append(jsonrawdata)
 
@@ -70,6 +71,7 @@ def get_caption(image):
     keys.remove('imagedata')
     #keys.remove('danam_id')
     keys.remove('mon_ids')
+    keys.remove('nepali_mon_id')
     #keys.remove('editorials')
     
     try: 
@@ -148,7 +150,10 @@ def get_caption(image):
     if "(CC BY-SA 4.0)." in textfield:
         textfield = textfield.split('(CC BY-SA 4.0).')[1].strip()
 
-
+    if textfield.strip().startswith("; "):
+        textfield = textfield.split("; ", 1)[1]
+    if textfield.strip().endswith(";"):
+        textfield = textfield.rsplit(";", 1)[0]
     return textfield
 
 '''
@@ -191,11 +196,14 @@ def metadata_from_json(image_json, image_metadata):
 
     #get mon_id
     image_metadata['mon_id'] = ""
+
     for mon_id in [i for i in image_json['mon_ids'] if i is not None]:
         regex_search = re.search('[A-Z]{3}[0-9]{3,4}', mon_id)
         if regex_search != None:
             image_metadata['mon_id'] = mon_id
+ 
     if image_metadata['mon_id'] == "":
+        """    
         fname = image_metadata['filename']
         #print(fname)
         regex_search = re.search('[A-Z]{3}[0-9]{3,4}', fname)
@@ -203,9 +211,14 @@ def metadata_from_json(image_json, image_metadata):
             mon_id = ""
         else:
             mon_id = regex_search.group(0)
-        image_metadata['mon_id'] = mon_id
-
-
+        image_metadata['mon_id'] = mon_id 
+        """
+        print(image_json['nepali_mon_id'])
+        if len(image_metadata['nepali_mon_id']) > 0:
+            if "||" in image_json['nepali_mon_id'][0]:
+                mon_id = image_json['nepali_mon_id'][0].split("||")[1].strip()
+                image_metadata['mon_id'] = mon_id
+ 
     #try to get image classification - will be overwritten later, not sure if still needed? maybe for social/historical photograph???
     classification="architectural photograph"
     if "fb0a532e-b8f7-11e9-b8a9-0242ac120007" in image_json.keys():
@@ -224,6 +237,10 @@ def metadata_from_json(image_json, image_metadata):
         pass
     try:
         notes= image_json['fa9e551a-b100-11e9-b84d-0242ac120006'].strip().replace('&nbsp;', ' ')
+    except Exception as e:
+        pass
+    try:
+        notes= image_json['4b84b47a-9eea-11e9-8b93-0242ac120006'].strip().replace('&nbsp;', ' ')
     except Exception as e:
         pass
     image_metadata['notes'] = notes
