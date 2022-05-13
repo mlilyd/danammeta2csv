@@ -213,7 +213,7 @@ def metadata_from_json(image_json, image_metadata):
             mon_id = regex_search.group(0)
         image_metadata['mon_id'] = mon_id 
         """
-        print(image_json['nepali_mon_id'])
+        #print(image_json['nepali_mon_id'])
         if len(image_metadata['nepali_mon_id']) > 0:
             if "||" in image_json['nepali_mon_id'][0]:
                 mon_id = image_json['nepali_mon_id'][0].split("||")[1].strip()
