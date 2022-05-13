@@ -1,6 +1,6 @@
-import codecs
 from datetime import datetime
 from scripts.write_csv import list_from_txt
+
 
 def manual_fixes(df, filename):
     file = open(filename, 'r', encoding='UTF-8')
@@ -17,29 +17,38 @@ def manual_fixes(df, filename):
 Review metadata extracted from DANAM before uploading and replace faulty metadata using a CSV file
 
     df = Pandas DataFrame containing metadata of select images from DANAM
-    fixes = a CSV file containing fixes for the metadata. This CSV file has the format 
+    fixes = string,
+            a CSV file containing fixes for the metadata. This CSV file has the format 
             row_number,column_name,correct_value
-    checked = if False, takes select columns to prepare metadata for review using variable viewer. 
-              if True, metadata is fixed using prepared CSV defined in fixes.
+    checked = boolean,
+              if False, takes select columns to prepare metadata for review using variable viewer. 
+              if True, metadata is fixed using prepared CSV defined in fixes
+    label = string, optional, if given, the status of the metadata df will be printed out with this given label.
 '''
-def check_metadata(df, fixes, checked):
+def check_metadata(df, fixes, checked, label):
     cols = [
         'danam_caption', 'caption', 'date', 'date3', 'agent', 'role', 'agent2', 'role2', 'class_code', 'classification','source', 'notes', 'agent3', 'date_scan',
         ]
     manual_fixes(df, fixes)
     if not checked:
         df = df[cols]
-        print("PLEASE CHECK USING VARIABLE VIEW")
+        print(f"{label}: PLEASE CHECK USING VARIABLE VIEW")
     else: 
-        print("READY TO UPLOAD")
+        print(f"{label}: READY TO UPLOAD")
     return df
 
 
-def reset():
+def reset(reset_files=False):
+    if reset_files:
+        open("fixes\\all.fix", "w")
+        open("fixes\\historical.fix", "w")
+        open("fixes\\images.fix", "w")
+        open("fixes\\maps.fix", "w")
+        open("fixes\\recent.fix", "w")
     return (False,False,False,False,False)
 
 
-def prepare_metadata(danam_df, mon, fix, check, query=None):
+def prepare_metadata(danam_df, mon, fix, check, label="" ,query=None):
     mon_list = list_from_txt(mon)
 
     df = danam_df.loc[danam_df['mon_id'].isin(mon_list)]
@@ -48,7 +57,7 @@ def prepare_metadata(danam_df, mon, fix, check, query=None):
         df = df.loc[eval(query)]
 
     ## manual fixes##
-    df = check_metadata(df,fix,check)
+    df = check_metadata(df,fix,check, label)
 
     return df
 
@@ -78,28 +87,32 @@ def prepare_metadata_from_mon(danam_df,year,month,date,ready_all,ready_maps,read
     upload_all = prepare_metadata(danam_df,
                     "mon/upload_all.mon",
                     "fixes\\all.fix",
-                    ready_all
+                    ready_all,
+                    label = "ALL"
                     )
 
     upload_maps = prepare_metadata(danam_df,
                         "mon/upload_only_maps.mon",
                         "fixes\\maps.fix",
                         ready_maps,
-                        query="df['filename'].str.contains('_D_')"
+                        query="df['filename'].str.contains('_D_')",
+                        label = "MAPS"
                         )
 
     upload_historical = prepare_metadata(danam_df,
                         "mon/upload_only_historical.mon",
                         "fixes\\historical.fix",
                         ready_historical,
-                        query="df['filename'].str.contains('_H_')"
+                        query="df['filename'].str.contains('_H_')",
+                        label = "HISTORICAL"
                         )
                 
     upload_images = prepare_metadata(danam_df,
                         "mon/upload_only_images.mon",
                         "fixes\\images.fix",
                         ready_images,
-                        query="df['filename'].str.contains('_D_') == False"
+                        query="df['filename'].str.contains('_D_') == False",
+                        label = "ONLY PHOTOGRAPHS"
                         )
 
     get_recent_changes(danam_df,year,month,date)
@@ -108,7 +121,8 @@ def prepare_metadata_from_mon(danam_df,year,month,date,ready_all,ready_maps,read
                         "mon\\recently_changed.mon",
                         "fixes\\recent.fix",
                         ready_recent,
-                        query=f"df['lastModified'] > datetime({year}, {month}, {date})"
+                        query=f"df['lastModified'] > datetime({year}, {month}, {date})",
+                        label = 'RECENT CHANGES'
                         )
     return upload_all,upload_historical,upload_images,upload_maps,upload_recent_changes
 
