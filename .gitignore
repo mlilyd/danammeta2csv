@@ -3,3 +3,4 @@ json/DANAM/*
 .log
 scripts/__pycache__/*
 csv/image_metadata_.csv
+fixes/*
