@@ -1,4 +1,5 @@
 import pandas as pd
+import argparse
 
 def get_heidicon(path, odf=False):
     if odf:
@@ -210,5 +211,18 @@ def get_heidicon(path, odf=False):
     ]
 
     cleaned_df = cleaned_df.drop(to_drop, axis=1)
-
+    cleaned_df.to_excel("heidicon_cleaned.xlsx")
     return cleaned_df
+
+if __name__ == "__main__":
+
+    '''
+    use argparser to create a command promt tool
+    '''
+    argparser = argparse.ArgumentParser(description="clean up HeidICON CSV and convert to Excel sheet")
+
+    argparser.add_argument("-f", "--file", required=True, help="HeidICON CSV file")
+    args = argparser.parse_args()
+        
+    get_heidicon(args.file)
+    print("Complete!")
