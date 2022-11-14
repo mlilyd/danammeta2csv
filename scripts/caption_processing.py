@@ -78,7 +78,7 @@ def isDate(date):
         if search != None:
             if search.span(0)[0] == 0:
                 	return True
-                    
+    
     return False
 
 #check caption for keywords

@@ -1,11 +1,16 @@
+'''
+Python module that process DANAM JSON dump into pandas so that it can be worked on much more comfortably in Python. 
+Can be used as a command line tool or in a jupyter notebook.
+'''
+
 import codecs
 import argparse
 import html, json
 import re, os, ast
 from datetime import datetime
 
-
 from scripts.caption_processing import metadata_from_caption, valid_caption
+
 '''
 exports image array as a json file that can easily be re-imported into python and used again for other scripts. JSON is named
     'danam_metadata_<export date>_<export time>.json'

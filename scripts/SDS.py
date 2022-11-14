@@ -1,8 +1,12 @@
+'''
+python module that searches through SDS and find image information per monument
+'''
+
+
 import os
 import pandas as pd
 
 root_uploaded = '\\Already uploaded to HeidICON\\'
-
 root_not_uploaded = '\\Not yet uploaded to HeidICON\\'
 
 def get_images(root_dir, mon_id):

@@ -1,23 +1,29 @@
+'''
+command line tool for downloading specific images from DANAM automatically. 
+'''
+
 import io
 import codecs
 import os, os.path
 import requests
 import argparse
+import getpass
 
 from PIL import Image, UnidentifiedImageError
 from write_csv import list_from_txt
 
-URL = "https://danam.cats.uni-heidelberg.de/files/uploadedfiles/"
-DIR = "C:\\Users\\l7d\\Seafile\\Transfers\\Downloads\\"
+username = getpass.getuser()
 
-'''
-'''
-def get_image(image_url, filename):
-    req = requests.get(image_url)
-    img_file = Image.open(io.BytesIO(req.content))
-    img_file.save(filename)
+URL = "https://danam.cats.uni-heidelberg.de/files/uploadedfiles/"
+DIR = "C:\\Users\\{}\\Downloads\\".format(username) 
+
     
 '''
+download images automatically from DANAM
+a log is saved under log/downloads.log
+    array images: a list of the images that should be downloaded from DANAM
+    string dir: directory where the images will be downloaded to. This can be defined as a variable in this file above
+
 '''
 def download_images(images, dir=DIR): 
     log = "log/downloads.log"

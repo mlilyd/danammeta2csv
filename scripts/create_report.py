@@ -1,3 +1,13 @@
+'''
+Python module for automatic PDF report generation from DANAM.
+This is done using Selenium, which is a library for automated web-browsing. 
+This tool requires that Google Chrome and the corresponding Chrome driver is installed. 
+The chrome driver can be found at https://chromedriver.chromium.org/downloads 
+
+This tool works by automatically going to the monument pages of different monument and saving the page 
+as a PDF in the HeiBox folder
+'''
+
 import os
 import time
 import json
@@ -107,7 +117,7 @@ def chromedriver_init(chromedriverpath = 'chromedriver'):
     return driver
 
 '''
-get reports from id
+get reports from a list of IDs
 '''
 def get_reports(df_iterrows, driver):
     for mon in df_iterrows:
@@ -122,7 +132,10 @@ def get_reports(df_iterrows, driver):
             driver.execute_script('window.print();')
             
             filename = "DANAM_report_{}.pdf".format(mon_id)
-            shutil.move(download+driver.title+".pdf", save_folder+filename)
+            if os.path.isdir(save_folder):
+                shutil.move(download+driver.title+".pdf", save_folder+filename)
+            else:
+                shutil.move(download+driver.title+".pdf", download+filename)
             print(filename + " downloaded.")
             #break
             
